@@ -23,6 +23,11 @@ app.use(cors()); // Enable CORS
 
 // Routes
 app.use('/api/auth', require('./routes/auth'));
+app.use('/api/courses', require('./routes/courses'));
+app.use('/api/materials', require('./routes/materials'));
+app.use('/api/assignments', require('./routes/assignments'));
+app.use('/api/submissions', require('./routes/submissions'));
+app.use('/api/attendance', require('./routes/attendance'));
 // Add other routes as needed
 // app.use('/api/users', require('./routes/users'));
 // app.use('/api/profiles', require('./routes/profiles'));

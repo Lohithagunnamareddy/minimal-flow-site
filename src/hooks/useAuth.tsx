@@ -106,8 +106,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       
       // Simulate JWT token storage (in a real app, the token would come from the backend)
       localStorage.setItem('token', 'demo-jwt-token');
-      
-      return userWithoutPassword;
     } finally {
       setIsLoading(false);
     }
@@ -128,9 +126,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       
       // In a real app, this would send the data to your API
       console.log('Registering user:', data);
-      
-      // For demo purposes, we don't actually store the new user
-      return true;
     } finally {
       setIsLoading(false);
     }

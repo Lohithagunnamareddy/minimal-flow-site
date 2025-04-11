@@ -15,6 +15,9 @@ import LoginPage from "./pages/LoginPage";
 import RegisterPage from "./pages/RegisterPage";
 import DashboardPage from "./pages/DashboardPage";
 import ProfilePage from "./pages/ProfilePage";
+import CoursesPage from "./pages/CoursesPage";
+import CourseDetailsPage from "./pages/CourseDetailsPage";
+import AssignmentPage from "./pages/AssignmentPage";
 import UnauthorizedPage from "./pages/UnauthorizedPage";
 import NotFound from "./pages/NotFound";
 
@@ -46,6 +49,30 @@ const App = () => (
               element={
                 <ProtectedRoute>
                   <ProfilePage />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/courses" 
+              element={
+                <ProtectedRoute>
+                  <CoursesPage />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/courses/:id" 
+              element={
+                <ProtectedRoute>
+                  <CourseDetailsPage />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/courses/:courseId/assignment/:assignmentId" 
+              element={
+                <ProtectedRoute>
+                  <AssignmentPage />
                 </ProtectedRoute>
               } 
             />
