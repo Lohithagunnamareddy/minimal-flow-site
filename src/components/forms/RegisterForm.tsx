@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -63,12 +62,25 @@ const RegisterForm: React.FC = () => {
     setIsLoading(true);
     
     try {
-      await register(formData);
+      await register({
+        firstName: formData.firstName,
+        lastName: formData.lastName,
+        email: formData.email,
+        password: formData.password,
+        role: formData.role,
+        department: formData.department || undefined,
+      });
+      
       toast({
         title: "Registration Successful",
         description: "Your account has been created. Please log in.",
       });
-      navigate('/login');
+      
+      // Delay navigation slightly to ensure the toast is seen
+      setTimeout(() => {
+        navigate('/login');
+      }, 1500);
+      
     } catch (error) {
       console.error('Registration error:', error);
       toast({

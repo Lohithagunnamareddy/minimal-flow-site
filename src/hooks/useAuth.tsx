@@ -66,6 +66,14 @@ const DEMO_USERS = [
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [registeredUsers, setRegisteredUsers] = useState<Array<typeof DEMO_USERS[0]>>(() => {
+    // Get registered users from localStorage if available
+    const saved = localStorage.getItem('registeredUsers');
+    return saved ? JSON.parse(saved) : [];
+  });
+  
+  // Combine demo users with registered users
+  const allUsers = [...DEMO_USERS, ...registeredUsers];
   
   // Check for existing auth token on mount
   useEffect(() => {
@@ -89,7 +97,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       await new Promise(resolve => setTimeout(resolve, 1000));
       
       // Find user (this is just for demo - in a real app this would be a backend call)
-      const foundUser = DEMO_USERS.find(
+      const foundUser = allUsers.find(
         (u) => u.email === email && u.password === password
       );
       
@@ -119,13 +127,30 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       // Simulate API request delay
       await new Promise(resolve => setTimeout(resolve, 1000));
       
-      // Check if email already exists
-      if (DEMO_USERS.some(user => user.email === data.email)) {
+      // Check if email already exists in all users
+      if (allUsers.some(user => user.email === data.email)) {
         throw new Error('Email already exists');
       }
       
-      // In a real app, this would send the data to your API
-      console.log('Registering user:', data);
+      // Create new user
+      const newUser = {
+        id: `reg-${Date.now()}`, // Generate a simple unique ID
+        email: data.email,
+        password: data.password, // In a real app, this would be hashed
+        firstName: data.firstName,
+        lastName: data.lastName,
+        role: data.role as 'student' | 'faculty' | 'admin',
+        department: data.department,
+      };
+      
+      // Add to registered users
+      const updatedUsers = [...registeredUsers, newUser];
+      setRegisteredUsers(updatedUsers);
+      
+      // Save to localStorage
+      localStorage.setItem('registeredUsers', JSON.stringify(updatedUsers));
+      
+      console.log('User registered successfully:', data);
     } finally {
       setIsLoading(false);
     }

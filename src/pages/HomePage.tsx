@@ -1,185 +1,167 @@
 
 import React from 'react';
-import { Button } from '@/components/ui/button';
 import { Link } from 'react-router-dom';
 import Layout from '@/components/layout/Layout';
-import { Book, Users, School, User, Calendar, Bell } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import { GraduationCap, BookOpen, FileText, Calendar, Users } from 'lucide-react';
 
 const HomePage: React.FC = () => {
   return (
     <Layout>
-      {/* Hero Section */}
-      <section className="py-16 md:py-24">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
-          <div className="space-y-6">
-            <h1 className="text-4xl md:text-5xl font-bold leading-tight text-gray-900">
-              Connecting Your Campus Community
-            </h1>
-            <p className="text-xl text-gray-600">
-              Campus Bridge provides a seamless platform for students, faculty, and administrators to collaborate, communicate, and succeed.
-            </p>
-            <div className="flex flex-col sm:flex-row gap-4">
-              <Button asChild size="lg">
-                <Link to="/register">Get Started</Link>
-              </Button>
-              <Button asChild variant="outline" size="lg">
-                <Link to="/login">Sign In</Link>
-              </Button>
-            </div>
-          </div>
-          <div className="flex justify-center">
-            <div className="relative w-full max-w-md">
-              <div className="absolute -top-4 -left-4 w-72 h-72 bg-blue-100 rounded-lg -z-10"></div>
-              <div className="absolute -bottom-4 -right-4 w-72 h-72 bg-red-100 rounded-lg -z-10"></div>
-              <div className="bg-white p-6 rounded-lg shadow-lg z-10">
-                <img 
-                  src="https://images.unsplash.com/photo-1523050854058-8df90110c9f1?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" 
-                  alt="Campus students" 
-                  className="rounded-lg w-full h-auto object-cover"
-                />
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-      
-      {/* Features Section */}
-      <section className="py-16 bg-gray-50">
-        <div className="text-center mb-16">
-          <h2 className="text-3xl font-bold mb-4">Everything You Need in One Place</h2>
-          <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-            Campus Bridge brings together all the tools and resources needed for a successful academic journey.
+      <div className="container mx-auto px-4 py-8">
+        <section className="py-12 md:py-24 lg:py-32 flex flex-col items-center text-center">
+          <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-6">
+            Welcome to Campus Bridge
+          </h1>
+          <p className="text-xl mb-8 max-w-2xl text-gray-600">
+            Your complete learning management system for educational institutions.
+            Connect, collaborate, and learn in one unified platform.
           </p>
-        </div>
-        
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          <div className="bg-white p-8 rounded-lg shadow-sm">
-            <div className="bg-blue-100 w-12 h-12 flex items-center justify-center rounded-full mb-6">
-              <Book className="text-primary h-6 w-6" />
-            </div>
-            <h3 className="text-xl font-bold mb-2">Course Management</h3>
-            <p className="text-gray-600">
-              Access course materials, submit assignments, and track your progress all in one place.
-            </p>
+          <div className="flex flex-wrap gap-4 justify-center">
+            <Button size="lg" asChild>
+              <Link to="/register">Get Started</Link>
+            </Button>
+            <Button size="lg" variant="outline" asChild>
+              <Link to="/login">Log In</Link>
+            </Button>
           </div>
-          
-          <div className="bg-white p-8 rounded-lg shadow-sm">
-            <div className="bg-blue-100 w-12 h-12 flex items-center justify-center rounded-full mb-6">
-              <Users className="text-primary h-6 w-6" />
-            </div>
-            <h3 className="text-xl font-bold mb-2">Community Engagement</h3>
-            <p className="text-gray-600">
-              Connect with peers, join study groups, and participate in campus activities.
-            </p>
+        </section>
+
+        <section className="py-12">
+          <h2 className="text-3xl font-bold text-center mb-12">Key Features</h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            <FeatureCard 
+              icon={<GraduationCap className="h-10 w-10" />}
+              title="Course Management"
+              description="Create, organize, and manage courses with ease. Track progress and student engagement."
+            />
+            <FeatureCard 
+              icon={<BookOpen className="h-10 w-10" />}
+              title="Learning Materials"
+              description="Upload and share documents, videos, and resources in multiple formats."
+            />
+            <FeatureCard 
+              icon={<FileText className="h-10 w-10" />}
+              title="Assignments & Grading"
+              description="Create assignments, track submissions, and provide timely feedback."
+            />
+            <FeatureCard 
+              icon={<Calendar className="h-10 w-10" />}
+              title="Attendance Tracking"
+              description="Record and monitor student attendance for in-person and online classes."
+            />
           </div>
-          
-          <div className="bg-white p-8 rounded-lg shadow-sm">
-            <div className="bg-blue-100 w-12 h-12 flex items-center justify-center rounded-full mb-6">
-              <Calendar className="text-primary h-6 w-6" />
-            </div>
-            <h3 className="text-xl font-bold mb-2">Scheduling & Planning</h3>
-            <p className="text-gray-600">
-              Manage your academic calendar, set reminders, and plan your semester effectively.
-            </p>
-          </div>
-          
-          <div className="bg-white p-8 rounded-lg shadow-sm">
-            <div className="bg-blue-100 w-12 h-12 flex items-center justify-center rounded-full mb-6">
-              <School className="text-primary h-6 w-6" />
-            </div>
-            <h3 className="text-xl font-bold mb-2">Academic Resources</h3>
-            <p className="text-gray-600">
-              Access a wide range of learning resources, library materials, and research tools.
-            </p>
-          </div>
-          
-          <div className="bg-white p-8 rounded-lg shadow-sm">
-            <div className="bg-blue-100 w-12 h-12 flex items-center justify-center rounded-full mb-6">
-              <Bell className="text-primary h-6 w-6" />
-            </div>
-            <h3 className="text-xl font-bold mb-2">Notifications & Alerts</h3>
-            <p className="text-gray-600">
-              Stay informed with real-time notifications about important deadlines and announcements.
-            </p>
-          </div>
-          
-          <div className="bg-white p-8 rounded-lg shadow-sm">
-            <div className="bg-blue-100 w-12 h-12 flex items-center justify-center rounded-full mb-6">
-              <User className="text-primary h-6 w-6" />
-            </div>
-            <h3 className="text-xl font-bold mb-2">Profile Management</h3>
-            <p className="text-gray-600">
-              Maintain your academic profile, showcase achievements, and build your portfolio.
-            </p>
-          </div>
-        </div>
-      </section>
-      
-      {/* CTA Section */}
-      <section className="py-20 bg-primary text-white">
-        <div className="text-center">
-          <h2 className="text-3xl font-bold mb-4">Ready to Transform Your Academic Experience?</h2>
-          <p className="text-xl opacity-90 max-w-2xl mx-auto mb-8">
-            Join thousands of students and faculty already using Campus Bridge to enhance their academic journey.
-          </p>
-          <Button asChild size="lg" variant="secondary">
-            <Link to="/register">Create Your Account Today</Link>
-          </Button>
-        </div>
-      </section>
-      
-      {/* Testimonials Section */}
-      <section className="py-16">
-        <h2 className="text-3xl font-bold text-center mb-12">What Our Users Say</h2>
-        
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-          <div className="bg-white p-6 rounded-lg shadow-sm border">
-            <div className="flex items-center mb-4">
-              <div className="w-12 h-12 bg-gray-200 rounded-full flex items-center justify-center mr-4">
-                <span className="text-gray-600 font-bold">JS</span>
+        </section>
+
+        <section className="py-12 bg-gray-50 rounded-lg p-8">
+          <h2 className="text-3xl font-bold text-center mb-6">Getting Started</h2>
+          <div className="max-w-3xl mx-auto">
+            <div className="space-y-4">
+              <div className="flex gap-4 items-start">
+                <div className="bg-primary text-white rounded-full w-8 h-8 flex items-center justify-center shrink-0">1</div>
+                <div>
+                  <h3 className="text-xl font-semibold">Create an Account</h3>
+                  <p className="text-gray-600">Register as a student, faculty member, or administrator.</p>
+                </div>
               </div>
-              <div>
-                <h4 className="font-bold">Jamie Smith</h4>
-                <p className="text-sm text-gray-600">Computer Science Student</p>
+              <div className="flex gap-4 items-start">
+                <div className="bg-primary text-white rounded-full w-8 h-8 flex items-center justify-center shrink-0">2</div>
+                <div>
+                  <h3 className="text-xl font-semibold">Explore the Dashboard</h3>
+                  <p className="text-gray-600">Access your personalized dashboard to view courses and activities.</p>
+                </div>
+              </div>
+              <div className="flex gap-4 items-start">
+                <div className="bg-primary text-white rounded-full w-8 h-8 flex items-center justify-center shrink-0">3</div>
+                <div>
+                  <h3 className="text-xl font-semibold">Join or Create Courses</h3>
+                  <p className="text-gray-600">Enroll in available courses or create new ones as an instructor.</p>
+                </div>
               </div>
             </div>
-            <p className="text-gray-600">
-              "Campus Bridge has revolutionized how I manage my coursework. The intuitive interface and helpful reminders ensure I never miss a deadline."
-            </p>
-          </div>
-          
-          <div className="bg-white p-6 rounded-lg shadow-sm border">
-            <div className="flex items-center mb-4">
-              <div className="w-12 h-12 bg-gray-200 rounded-full flex items-center justify-center mr-4">
-                <span className="text-gray-600 font-bold">DP</span>
-              </div>
-              <div>
-                <h4 className="font-bold">Dr. Patricia Johnson</h4>
-                <p className="text-sm text-gray-600">Biology Professor</p>
-              </div>
+            <div className="mt-8 text-center">
+              <Button size="lg" asChild>
+                <Link to="/register">Create Your Account</Link>
+              </Button>
             </div>
-            <p className="text-gray-600">
-              "As a faculty member, I appreciate how easy it is to communicate with students, share resources, and manage course materials all in one platform."
-            </p>
           </div>
-          
-          <div className="bg-white p-6 rounded-lg shadow-sm border">
-            <div className="flex items-center mb-4">
-              <div className="w-12 h-12 bg-gray-200 rounded-full flex items-center justify-center mr-4">
-                <span className="text-gray-600 font-bold">MK</span>
-              </div>
-              <div>
-                <h4 className="font-bold">Mark Kim</h4>
-                <p className="text-sm text-gray-600">Department Administrator</p>
-              </div>
+        </section>
+
+        <section className="py-12">
+          <h2 className="text-3xl font-bold text-center mb-6">Demo Accounts</h2>
+          <div className="max-w-3xl mx-auto bg-gray-100 p-6 rounded-lg">
+            <p className="text-center mb-4">
+              For demonstration purposes, you can use these test accounts:
+            </p>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <Card>
+                <CardHeader>
+                  <CardTitle>Student</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <p><strong>Email:</strong> student@example.com</p>
+                  <p><strong>Password:</strong> password123</p>
+                </CardContent>
+                <CardFooter>
+                  <Button className="w-full" variant="outline" asChild>
+                    <Link to="/login">Login as Student</Link>
+                  </Button>
+                </CardFooter>
+              </Card>
+              <Card>
+                <CardHeader>
+                  <CardTitle>Faculty</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <p><strong>Email:</strong> faculty@example.com</p>
+                  <p><strong>Password:</strong> password123</p>
+                </CardContent>
+                <CardFooter>
+                  <Button className="w-full" variant="outline" asChild>
+                    <Link to="/login">Login as Faculty</Link>
+                  </Button>
+                </CardFooter>
+              </Card>
+              <Card>
+                <CardHeader>
+                  <CardTitle>Admin</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <p><strong>Email:</strong> admin@example.com</p>
+                  <p><strong>Password:</strong> password123</p>
+                </CardContent>
+                <CardFooter>
+                  <Button className="w-full" variant="outline" asChild>
+                    <Link to="/login">Login as Admin</Link>
+                  </Button>
+                </CardFooter>
+              </Card>
             </div>
-            <p className="text-gray-600">
-              "The administrative tools in Campus Bridge have streamlined our departmental processes and improved communication across all levels of our organization."
-            </p>
           </div>
-        </div>
-      </section>
+        </section>
+      </div>
     </Layout>
+  );
+};
+
+interface FeatureCardProps {
+  icon: React.ReactNode;
+  title: string;
+  description: string;
+}
+
+const FeatureCard: React.FC<FeatureCardProps> = ({ icon, title, description }) => {
+  return (
+    <Card className="text-center">
+      <CardHeader>
+        <div className="mx-auto mb-4 bg-primary/10 p-4 rounded-full">{icon}</div>
+        <CardTitle>{title}</CardTitle>
+      </CardHeader>
+      <CardContent>
+        <CardDescription className="text-base">{description}</CardDescription>
+      </CardContent>
+    </Card>
   );
 };
 

@@ -32,17 +32,22 @@ const LoginForm: React.FC = () => {
     
     try {
       await login(email, password);
+      
       toast({
         title: "Login Successful",
         description: "Welcome back to Campus Bridge!",
       });
+      
+      // Navigate to dashboard after login
       navigate('/dashboard');
     } catch (error) {
       console.error('Login error:', error);
+      
+      // Show specific error message to help the user
       toast({
         variant: "destructive",
         title: "Login Failed",
-        description: "Invalid credentials. Please try again.",
+        description: "Invalid credentials. For testing, try student@example.com or faculty@example.com with password123.",
       });
     } finally {
       setIsLoading(false);
@@ -90,6 +95,12 @@ const LoginForm: React.FC = () => {
             Register
           </a>
         </p>
+        <div className="mt-4 text-center text-xs text-gray-500">
+          <p>Demo accounts:</p>
+          <p>student@example.com / password123</p>
+          <p>faculty@example.com / password123</p>
+          <p>admin@example.com / password123</p>
+        </div>
       </CardFooter>
     </form>
   );
