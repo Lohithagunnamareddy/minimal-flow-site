@@ -79,7 +79,7 @@ const CourseAssignments: React.FC<CourseAssignmentsProps> = ({ courseId, isInstr
     } else if (assignment.status === 'submitted') {
       return <Badge variant="secondary">Submitted</Badge>;
     } else if (assignment.status === 'graded') {
-      return <Badge variant="success">Graded: {assignment.grade}/{assignment.pointsPossible}</Badge>;
+      return <Badge variant="secondary" className="bg-green-100 text-green-800">Graded: {assignment.grade}/{assignment.pointsPossible}</Badge>;
     }
     
     return null;
