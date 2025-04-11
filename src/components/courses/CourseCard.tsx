@@ -1,9 +1,10 @@
 
 import React from 'react';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Calendar, Clock, GraduationCap, Users } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
+import { Calendar, ChevronRight, Users } from 'lucide-react';
+import { Link } from 'react-router-dom';
 
 interface CourseCardProps {
   course: {
@@ -11,73 +12,88 @@ interface CourseCardProps {
     title: string;
     courseCode: string;
     description: string;
+    department: string;
     instructor: {
       firstName: string;
       lastName: string;
     };
-    department: string;
-    schedule: {
+    students?: Array<any>;
+    schedule?: {
       days: string[];
       startTime: string;
       endTime: string;
       location: string;
     };
-    students?: any[];
   };
-  isInstructor?: boolean;
+  isInstructor: boolean;
 }
 
-const CourseCard: React.FC<CourseCardProps> = ({ course, isInstructor = false }) => {
-  const navigate = useNavigate();
+const CourseCard: React.FC<CourseCardProps> = ({ course, isInstructor }) => {
+  const getDepartmentBadgeColor = (dept: string) => {
+    const deptColors: Record<string, string> = {
+      'cs': 'bg-blue-100 text-blue-800',
+      'math': 'bg-green-100 text-green-800',
+      'eng': 'bg-amber-100 text-amber-800',
+      'sci': 'bg-indigo-100 text-indigo-800',
+      'arts': 'bg-rose-100 text-rose-800',
+      'bus': 'bg-purple-100 text-purple-800',
+    };
+    
+    return deptColors[dept.toLowerCase()] || 'bg-gray-100 text-gray-800';
+  };
   
   return (
-    <Card className="h-full flex flex-col">
-      <CardHeader className="pb-3">
-        <div className="flex justify-between items-start">
-          <div>
-            <CardTitle className="text-xl">{course.title}</CardTitle>
-            <CardDescription className="text-sm mt-1">{course.courseCode}</CardDescription>
-          </div>
-          <span className="px-2 py-1 text-xs rounded-full bg-primary/10 text-primary font-medium">
-            {course.department.toUpperCase()}
-          </span>
-        </div>
-      </CardHeader>
-      <CardContent className="flex-grow">
-        <p className="text-sm text-muted-foreground mb-4 line-clamp-2">
-          {course.description}
-        </p>
-        <div className="space-y-3">
-          <div className="flex items-center text-sm">
-            <GraduationCap className="h-4 w-4 mr-2 text-muted-foreground" />
-            <span>
-              {course.instructor.firstName} {course.instructor.lastName}
-            </span>
-          </div>
-          <div className="flex items-center text-sm">
-            <Calendar className="h-4 w-4 mr-2 text-muted-foreground" />
-            <span>{course.schedule?.days?.join(', ') || 'Schedule not set'}</span>
-          </div>
-          <div className="flex items-center text-sm">
-            <Clock className="h-4 w-4 mr-2 text-muted-foreground" />
-            <span>
-              {course.schedule?.startTime} - {course.schedule?.endTime}
-            </span>
-          </div>
+    <Card className="h-full flex flex-col hover:shadow-md transition-shadow">
+      <CardHeader className="pb-2">
+        <div className="flex justify-between">
+          <Badge 
+            className={`${getDepartmentBadgeColor(course.department)} font-normal`}
+            variant="outline"
+          >
+            {course.courseCode}
+          </Badge>
+          
           {isInstructor && course.students && (
-            <div className="flex items-center text-sm">
-              <Users className="h-4 w-4 mr-2 text-muted-foreground" />
-              <span>{course.students.length} Students</span>
+            <Badge variant="outline" className="flex items-center gap-1 font-normal">
+              <Users className="h-3 w-3" /> 
+              {course.students.length} student{course.students.length !== 1 ? 's' : ''}
+            </Badge>
+          )}
+        </div>
+        <CardTitle className="text-xl mt-2 line-clamp-1">{course.title}</CardTitle>
+        <CardDescription className="line-clamp-2">
+          {course.description}
+        </CardDescription>
+      </CardHeader>
+      
+      <CardContent className="flex-grow">
+        <div className="text-sm text-muted-foreground">
+          <div className="flex items-center mt-1 gap-1">
+            <span className="font-medium text-foreground">Instructor:</span> 
+            <span>{course.instructor.firstName} {course.instructor.lastName}</span>
+          </div>
+          
+          {course.schedule && (
+            <div className="mt-2 space-y-1">
+              <div className="flex items-start gap-1">
+                <Calendar className="h-4 w-4 mt-0.5 flex-shrink-0" />
+                <div>
+                  <p>{course.schedule.days.join(', ')}</p>
+                  <p>{course.schedule.startTime} - {course.schedule.endTime}</p>
+                  <p>{course.schedule.location}</p>
+                </div>
+              </div>
             </div>
           )}
         </div>
       </CardContent>
-      <CardFooter className="pt-3 border-t">
-        <Button
-          className="w-full"
-          onClick={() => navigate(`/courses/${course._id}`)}
-        >
-          {isInstructor ? 'Manage Course' : 'View Course'}
+      
+      <CardFooter className="pt-2 border-t">
+        <Button asChild className="w-full">
+          <Link to={`/courses/${course._id}`} className="flex items-center justify-center">
+            {isInstructor ? 'Manage Course' : 'View Course'}
+            <ChevronRight className="ml-1 h-4 w-4" />
+          </Link>
         </Button>
       </CardFooter>
     </Card>

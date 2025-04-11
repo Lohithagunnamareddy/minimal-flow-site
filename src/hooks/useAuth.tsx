@@ -11,6 +11,11 @@ interface User {
   department?: string;
 }
 
+// Define user with password for internal use
+interface UserWithPassword extends User {
+  password: string;
+}
+
 // Define registration data type
 interface RegisterData {
   firstName: string;
@@ -34,14 +39,14 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 // Sample users for demonstration (in a real app, this would come from a database)
-const DEMO_USERS = [
+const DEMO_USERS: UserWithPassword[] = [
   {
     id: '1',
     email: 'student@example.com',
     password: 'password123',
     firstName: 'Sam',
     lastName: 'Student',
-    role: 'student' as const,
+    role: 'student',
     department: 'cs',
   },
   {
@@ -50,7 +55,7 @@ const DEMO_USERS = [
     password: 'password123',
     firstName: 'Frank',
     lastName: 'Faculty',
-    role: 'faculty' as const,
+    role: 'faculty',
     department: 'cs',
   },
   {
@@ -59,14 +64,14 @@ const DEMO_USERS = [
     password: 'password123',
     firstName: 'Alice',
     lastName: 'Admin',
-    role: 'admin' as const,
+    role: 'admin',
   },
 ];
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [registeredUsers, setRegisteredUsers] = useState<Array<typeof DEMO_USERS[0]>>(() => {
+  const [registeredUsers, setRegisteredUsers] = useState<UserWithPassword[]>(() => {
     // Get registered users from localStorage if available
     const saved = localStorage.getItem('registeredUsers');
     return saved ? JSON.parse(saved) : [];
@@ -132,8 +137,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         throw new Error('Email already exists');
       }
       
-      // Create new user
-      const newUser = {
+      // Create new user with proper typing
+      const newUser: UserWithPassword = {
         id: `reg-${Date.now()}`, // Generate a simple unique ID
         email: data.email,
         password: data.password, // In a real app, this would be hashed

@@ -1,19 +1,22 @@
 
 import React, { useState } from 'react';
-import { useQuery } from '@tanstack/react-query';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { TableHead, TableRow, TableHeader, TableCell, TableBody, Table } from '@/components/ui/table';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Calendar as CalendarIcon, ChevronLeft, ChevronRight, Plus, Save } from 'lucide-react';
-import { cn } from '@/lib/utils';
-import { format } from 'date-fns';
-import { Calendar } from '@/components/ui/calendar';
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { TableHead, TableRow, TableHeader, TableCell, TableBody, Table } from '@/components/ui/table';
+import { Calendar, Check, Plus, Search, X } from 'lucide-react';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogFooter, DialogTrigger } from '@/components/ui/dialog';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { format } from 'date-fns';
+import { Calendar as CalendarComponent } from '@/components/ui/calendar';
+import { useToast } from '@/components/ui/use-toast';
 
 interface CourseAttendanceProps {
   courseId: string;
+  isInstructor: boolean;
   students: Array<{
     _id: string;
     firstName: string;
@@ -22,252 +25,359 @@ interface CourseAttendanceProps {
   }>;
 }
 
-// Mock fetch function (replace with actual API call)
-const fetchAttendanceRecords = async (courseId: string) => {
-  // This would be an API call in a real app
-  return [
-    {
-      _id: '1',
-      date: '2024-09-05T00:00:00Z',
-      records: [
-        { student: '1', status: 'present' }
-      ]
-    },
-    {
-      _id: '2',
-      date: '2024-09-07T00:00:00Z',
-      records: [
-        { student: '1', status: 'absent' }
-      ]
-    }
-  ];
+// Mock data for attendance records
+const MOCK_ATTENDANCE = [
+  {
+    _id: '1',
+    date: '2024-09-15T10:00:00',
+    records: [
+      { student: '1', status: 'present' },
+      { student: '2', status: 'absent' },
+      { student: '3', status: 'late' }
+    ]
+  },
+  {
+    _id: '2',
+    date: '2024-09-17T10:00:00',
+    records: [
+      { student: '1', status: 'present' },
+      { student: '2', status: 'present' },
+      { student: '3', status: 'excused' }
+    ]
+  }
+];
+
+const AttendanceTable: React.FC<{
+  students: CourseAttendanceProps['students']; 
+  date: Date;
+  records: Record<string, string>;
+  onStatusChange: (studentId: string, status: string) => void;
+  readOnly?: boolean;
+}> = ({ students, date, records, onStatusChange, readOnly = false }) => {
+  return (
+    <Table className="border">
+      <TableHeader>
+        <TableRow>
+          <TableHead className="w-[300px]">Student</TableHead>
+          <TableHead>Status</TableHead>
+          {!readOnly && <TableHead className="w-[100px]">Actions</TableHead>}
+        </TableRow>
+      </TableHeader>
+      <TableBody>
+        {students.map(student => {
+          const status = records[student._id] || 'absent';
+          
+          const getStatusDisplay = () => {
+            switch (status) {
+              case 'present':
+                return <Badge variant="outline" className="bg-green-100 text-green-800">Present</Badge>;
+              case 'absent':
+                return <Badge variant="outline" className="bg-red-100 text-red-800">Absent</Badge>;
+              case 'late':
+                return <Badge variant="outline" className="bg-amber-100 text-amber-800">Late</Badge>;
+              case 'excused':
+                return <Badge variant="outline" className="bg-blue-100 text-blue-800">Excused</Badge>;
+              default:
+                return <Badge variant="outline" className="bg-gray-100">Unknown</Badge>;
+            }
+          };
+          
+          return (
+            <TableRow key={student._id}>
+              <TableCell className="font-medium">{student.firstName} {student.lastName}</TableCell>
+              <TableCell>
+                {readOnly ? (
+                  getStatusDisplay()
+                ) : (
+                  <Select defaultValue={status} onValueChange={(value) => onStatusChange(student._id, value)}>
+                    <SelectTrigger className="w-[160px]">
+                      <SelectValue placeholder="Status" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="present">Present</SelectItem>
+                      <SelectItem value="absent">Absent</SelectItem>
+                      <SelectItem value="late">Late</SelectItem>
+                      <SelectItem value="excused">Excused</SelectItem>
+                    </SelectContent>
+                  </Select>
+                )}
+              </TableCell>
+              {!readOnly && (
+                <TableCell>
+                  <div className="flex space-x-2">
+                    <Button 
+                      variant="outline" 
+                      size="sm" 
+                      onClick={() => onStatusChange(student._id, 'present')}
+                      className="w-9 p-0"
+                    >
+                      <Check className="h-4 w-4 text-green-600" />
+                    </Button>
+                    <Button 
+                      variant="outline" 
+                      size="sm" 
+                      onClick={() => onStatusChange(student._id, 'absent')}
+                      className="w-9 p-0"
+                    >
+                      <X className="h-4 w-4 text-red-600" />
+                    </Button>
+                  </div>
+                </TableCell>
+              )}
+            </TableRow>
+          );
+        })}
+      </TableBody>
+    </Table>
+  );
 };
 
-const CourseAttendance: React.FC<CourseAttendanceProps> = ({ courseId, students }) => {
-  const [date, setDate] = useState<Date | undefined>(new Date());
-  const [attendanceData, setAttendanceData] = useState<Record<string, string>>({});
-  const [isEditMode, setIsEditMode] = useState(false);
+const CourseAttendance: React.FC<CourseAttendanceProps> = ({ 
+  courseId, 
+  isInstructor,
+  students 
+}) => {
+  const [attendanceRecords, setAttendanceRecords] = useState(MOCK_ATTENDANCE);
+  const [selectedDate, setSelectedDate] = useState<Date>(new Date());
+  const [recordDate, setRecordDate] = useState<Date | undefined>(new Date());
+  const [isRecordDialogOpen, setIsRecordDialogOpen] = useState(false);
+  const [newAttendanceRecords, setNewAttendanceRecords] = useState<Record<string, string>>({});
+  const [searchQuery, setSearchQuery] = useState('');
+  const { toast } = useToast();
   
-  const { data: attendanceRecords, isLoading } = useQuery({
-    queryKey: ['attendance', courseId],
-    queryFn: () => fetchAttendanceRecords(courseId),
-    enabled: !!courseId,
-  });
-  
-  const handleSaveAttendance = () => {
-    console.log('Saving attendance for', date, attendanceData);
-    // This would be an API call in a real app
-    setIsEditMode(false);
-  };
+  // Initialize attendance records for all students
+  React.useEffect(() => {
+    if (isRecordDialogOpen) {
+      const initialRecords: Record<string, string> = {};
+      students.forEach(student => {
+        initialRecords[student._id] = 'absent'; // Default to absent
+      });
+      setNewAttendanceRecords(initialRecords);
+    }
+  }, [isRecordDialogOpen, students]);
   
   const handleStatusChange = (studentId: string, status: string) => {
-    setAttendanceData(prev => ({
+    setNewAttendanceRecords(prev => ({
       ...prev,
       [studentId]: status
     }));
   };
   
-  const getAttendanceForDate = () => {
-    if (!date || !attendanceRecords) return {};
+  const getAttendanceForDate = (date: Date) => {
+    // Convert date to string format for comparison
+    const dateStr = date.toISOString().split('T')[0];
     
-    const dateString = format(date, 'yyyy-MM-dd');
     const record = attendanceRecords.find(record => {
-      const recordDate = new Date(record.date);
-      return format(recordDate, 'yyyy-MM-dd') === dateString;
+      const recordDate = new Date(record.date).toISOString().split('T')[0];
+      return recordDate === dateStr;
     });
     
-    if (!record) return {};
+    if (!record) return null;
     
-    const result: Record<string, string> = {};
-    record.records.forEach(entry => {
-      result[entry.student] = entry.status;
+    // Format records as a map of studentId -> status
+    const formattedRecords: Record<string, string> = {};
+    record.records.forEach(r => {
+      formattedRecords[r.student] = r.status;
     });
     
-    return result;
+    return {
+      id: record._id,
+      date: new Date(record.date),
+      records: formattedRecords
+    };
   };
   
-  // Initialize attendance data when date changes
-  React.useEffect(() => {
+  const selectedDateRecord = selectedDate ? getAttendanceForDate(selectedDate) : null;
+  
+  const handleSaveAttendance = () => {
+    // Format new attendance record
+    const newRecord = {
+      _id: `new-${Date.now()}`,
+      date: recordDate?.toISOString() || new Date().toISOString(),
+      records: Object.entries(newAttendanceRecords).map(([student, status]) => ({
+        student,
+        status
+      }))
+    };
+    
+    // Add to attendance records
+    setAttendanceRecords(prev => [...prev, newRecord]);
+    
+    // Close dialog and show toast
+    setIsRecordDialogOpen(false);
+    toast({
+      title: "Attendance Recorded",
+      description: `Attendance for ${format(recordDate || new Date(), 'PPP')} has been saved.`,
+    });
+  };
+  
+  const handleDateSelect = (date: Date | undefined) => {
     if (date) {
-      const existingData = getAttendanceForDate();
-      setAttendanceData(existingData);
-      setIsEditMode(Object.keys(existingData).length === 0);
-    }
-  }, [date, attendanceRecords]);
-  
-  const statusOptions = [
-    { value: 'present', label: 'Present' },
-    { value: 'absent', label: 'Absent' },
-    { value: 'late', label: 'Late' },
-    { value: 'excused', label: 'Excused' }
-  ];
-  
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'present':
-        return 'bg-green-100 text-green-800';
-      case 'absent':
-        return 'bg-red-100 text-red-800';
-      case 'late':
-        return 'bg-yellow-100 text-yellow-800';
-      case 'excused':
-        return 'bg-blue-100 text-blue-800';
-      default:
-        return 'bg-gray-100 text-gray-800';
+      setSelectedDate(date);
     }
   };
   
-  if (isLoading) {
-    return (
-      <div className="flex justify-center items-center h-48">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
-      </div>
-    );
-  }
+  const filteredStudents = searchQuery 
+    ? students.filter(student => {
+        const fullName = `${student.firstName} ${student.lastName}`.toLowerCase();
+        return fullName.includes(searchQuery.toLowerCase());
+      })
+    : students;
   
   return (
     <div className="space-y-6">
-      <div className="flex flex-col sm:flex-row justify-between gap-4">
-        <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
-          <Popover>
-            <PopoverTrigger asChild>
-              <Button
-                variant="outline"
-                className={cn(
-                  "justify-start text-left font-normal",
-                  !date && "text-muted-foreground"
-                )}
-              >
-                <CalendarIcon className="mr-2 h-4 w-4" />
-                {date ? format(date, "PPP") : <span>Pick a date</span>}
+      <div className="flex justify-between items-center">
+        <h2 className="text-2xl font-bold">Attendance</h2>
+        {isInstructor && (
+          <Dialog open={isRecordDialogOpen} onOpenChange={setIsRecordDialogOpen}>
+            <DialogTrigger asChild>
+              <Button>
+                <Plus className="mr-2 h-4 w-4" />
+                Record Attendance
               </Button>
-            </PopoverTrigger>
-            <PopoverContent className="w-auto p-0">
-              <Calendar
-                mode="single"
-                selected={date}
-                onSelect={setDate}
-                initialFocus
-              />
-            </PopoverContent>
-          </Popover>
-          
-          <div className="flex gap-2">
-            <Button
-              variant="outline"
-              size="icon"
-              onClick={() => {
-                if (date) {
-                  const prev = new Date(date);
-                  prev.setDate(prev.getDate() - 1);
-                  setDate(prev);
-                }
-              }}
-            >
-              <ChevronLeft className="h-4 w-4" />
-            </Button>
-            <Button
-              variant="outline"
-              size="icon"
-              onClick={() => {
-                if (date) {
-                  const next = new Date(date);
-                  next.setDate(next.getDate() + 1);
-                  setDate(next);
-                }
-              }}
-            >
-              <ChevronRight className="h-4 w-4" />
-            </Button>
-          </div>
-        </div>
-        
-        <div className="flex gap-2">
-          {isEditMode ? (
-            <Button variant="default" onClick={handleSaveAttendance}>
-              <Save className="mr-2 h-4 w-4" />
-              Save Attendance
-            </Button>
-          ) : (
-            <Button variant="outline" onClick={() => setIsEditMode(true)}>
-              <Plus className="mr-2 h-4 w-4" />
-              Take Attendance
-            </Button>
-          )}
-        </div>
+            </DialogTrigger>
+            <DialogContent className="max-w-4xl">
+              <DialogHeader>
+                <DialogTitle>Record Attendance</DialogTitle>
+                <DialogDescription>
+                  Take attendance for the selected date. Default status is absent.
+                </DialogDescription>
+              </DialogHeader>
+              
+              <div className="py-4 space-y-4">
+                <div className="flex items-center gap-4">
+                  <Label htmlFor="record-date" className="min-w-32">Attendance Date:</Label>
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <Button variant="outline" className="w-[240px] justify-start text-left font-normal">
+                        <Calendar className="mr-2 h-4 w-4" />
+                        {recordDate ? format(recordDate, 'PPP') : <span>Pick a date</span>}
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto p-0" align="start">
+                      <CalendarComponent
+                        mode="single"
+                        selected={recordDate}
+                        onSelect={setRecordDate}
+                        initialFocus
+                      />
+                    </PopoverContent>
+                  </Popover>
+                </div>
+                
+                <AttendanceTable 
+                  students={students}
+                  date={recordDate || new Date()}
+                  records={newAttendanceRecords}
+                  onStatusChange={handleStatusChange}
+                />
+              </div>
+              
+              <DialogFooter>
+                <Button variant="outline" onClick={() => setIsRecordDialogOpen(false)}>
+                  Cancel
+                </Button>
+                <Button onClick={handleSaveAttendance}>
+                  Save Attendance
+                </Button>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
+        )}
       </div>
       
-      <Card>
-        <CardHeader>
-          <CardTitle>Attendance Record</CardTitle>
-          <CardDescription>
-            {date ? format(date, "EEEE, MMMM d, yyyy") : "Select a date to view or record attendance"}
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          {students.length === 0 ? (
-            <div className="text-center py-8">
-              <p className="text-muted-foreground">No students enrolled in this course</p>
-            </div>
-          ) : (
-            <div className="border rounded-md">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Student</TableHead>
-                    <TableHead>Status</TableHead>
-                    <TableHead>Notes</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {students.map((student) => (
-                    <TableRow key={student._id}>
-                      <TableCell className="font-medium">
-                        {student.firstName} {student.lastName}
-                      </TableCell>
-                      <TableCell>
-                        {isEditMode ? (
-                          <Select
-                            value={attendanceData[student._id] || 'absent'}
-                            onValueChange={(value) => handleStatusChange(student._id, value)}
-                          >
-                            <SelectTrigger className="w-[180px]">
-                              <SelectValue placeholder="Select status" />
-                            </SelectTrigger>
-                            <SelectContent>
-                              {statusOptions.map(option => (
-                                <SelectItem key={option.value} value={option.value}>
-                                  {option.label}
-                                </SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
-                        ) : (
-                          <span className={cn(
-                            "px-2 py-1 rounded-full text-xs font-medium",
-                            getStatusColor(attendanceData[student._id] || 'absent')
-                          )}>
-                            {attendanceData[student._id] ? 
-                              statusOptions.find(o => o.value === attendanceData[student._id])?.label : 
-                              'Not Recorded'}
-                          </span>
-                        )}
-                      </TableCell>
-                      <TableCell>
-                        {isEditMode ? (
-                          <Input placeholder="Optional notes" className="w-full" />
-                        ) : (
-                          <span className="text-muted-foreground text-sm">No notes</span>
-                        )}
-                      </TableCell>
-                    </TableRow>
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <Card className="md:col-span-1">
+          <CardHeader>
+            <CardTitle>Attendance Dates</CardTitle>
+            <CardDescription>Select a date to view records</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button variant="outline" className="w-full justify-start text-left font-normal">
+                    <Calendar className="mr-2 h-4 w-4" />
+                    {selectedDate ? format(selectedDate, 'PPP') : <span>Pick a date</span>}
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0" align="start">
+                  <CalendarComponent
+                    mode="single"
+                    selected={selectedDate}
+                    onSelect={handleDateSelect}
+                    initialFocus
+                  />
+                </PopoverContent>
+              </Popover>
+              
+              <div className="space-y-2 mt-4">
+                <p className="text-sm font-medium">Recent Attendance Records:</p>
+                <ul className="space-y-2">
+                  {attendanceRecords.map(record => (
+                    <li key={record._id}>
+                      <Button 
+                        variant="ghost" 
+                        className="w-full justify-start text-left"
+                        onClick={() => setSelectedDate(new Date(record.date))}
+                      >
+                        <Calendar className="mr-2 h-4 w-4" />
+                        {format(new Date(record.date), 'PPP')}
+                      </Button>
+                    </li>
                   ))}
-                </TableBody>
-              </Table>
+                </ul>
+              </div>
             </div>
-          )}
-        </CardContent>
-      </Card>
+          </CardContent>
+        </Card>
+        
+        <Card className="md:col-span-2">
+          <CardHeader>
+            <CardTitle>
+              {selectedDate ? (
+                <>Attendance for {format(selectedDate, 'PPP')}</>
+              ) : 'Attendance Records'}
+            </CardTitle>
+            <CardDescription>
+              {selectedDateRecord 
+                ? `Viewing ${students.length} students' attendance records` 
+                : 'Select a date to view attendance records'
+              }
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            {selectedDateRecord ? (
+              <div className="space-y-4">
+                <div className="relative">
+                  <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+                  <Input
+                    placeholder="Search students..."
+                    className="pl-8"
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                  />
+                </div>
+                
+                <AttendanceTable 
+                  students={filteredStudents}
+                  date={selectedDateRecord.date}
+                  records={selectedDateRecord.records}
+                  onStatusChange={() => {}}
+                  readOnly={!isInstructor}
+                />
+              </div>
+            ) : (
+              <div className="text-center py-8">
+                <p className="text-muted-foreground">No attendance records selected</p>
+                <p className="text-sm text-muted-foreground mt-2">
+                  Select a date from the calendar to view attendance
+                </p>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      </div>
     </div>
   );
 };

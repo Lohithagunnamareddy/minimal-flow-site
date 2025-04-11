@@ -1,167 +1,179 @@
 
 import React from 'react';
 import { Link } from 'react-router-dom';
-import Layout from '@/components/layout/Layout';
-import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { GraduationCap, BookOpen, FileText, Calendar, Users } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import Layout from '@/components/layout/Layout';
+import { useAuth } from '@/hooks/useAuth';
+import { BookOpen, Users, Award, FileText, Calendar } from 'lucide-react';
 
 const HomePage: React.FC = () => {
+  const { user } = useAuth();
+  
   return (
     <Layout>
-      <div className="container mx-auto px-4 py-8">
-        <section className="py-12 md:py-24 lg:py-32 flex flex-col items-center text-center">
-          <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-6">
-            Welcome to Campus Bridge
-          </h1>
-          <p className="text-xl mb-8 max-w-2xl text-gray-600">
-            Your complete learning management system for educational institutions.
-            Connect, collaborate, and learn in one unified platform.
+      <div className="container mx-auto py-8 px-4">
+        <div className="text-center mb-12">
+          <h1 className="text-4xl font-bold mb-4">Welcome to Campus Bridge</h1>
+          <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
+            Your comprehensive learning management system designed for students, faculty, and administrators.
           </p>
-          <div className="flex flex-wrap gap-4 justify-center">
-            <Button size="lg" asChild>
-              <Link to="/register">Get Started</Link>
-            </Button>
-            <Button size="lg" variant="outline" asChild>
-              <Link to="/login">Log In</Link>
-            </Button>
-          </div>
-        </section>
-
-        <section className="py-12">
-          <h2 className="text-3xl font-bold text-center mb-12">Key Features</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            <FeatureCard 
-              icon={<GraduationCap className="h-10 w-10" />}
-              title="Course Management"
-              description="Create, organize, and manage courses with ease. Track progress and student engagement."
-            />
-            <FeatureCard 
-              icon={<BookOpen className="h-10 w-10" />}
-              title="Learning Materials"
-              description="Upload and share documents, videos, and resources in multiple formats."
-            />
-            <FeatureCard 
-              icon={<FileText className="h-10 w-10" />}
-              title="Assignments & Grading"
-              description="Create assignments, track submissions, and provide timely feedback."
-            />
-            <FeatureCard 
-              icon={<Calendar className="h-10 w-10" />}
-              title="Attendance Tracking"
-              description="Record and monitor student attendance for in-person and online classes."
-            />
-          </div>
-        </section>
-
-        <section className="py-12 bg-gray-50 rounded-lg p-8">
-          <h2 className="text-3xl font-bold text-center mb-6">Getting Started</h2>
-          <div className="max-w-3xl mx-auto">
-            <div className="space-y-4">
-              <div className="flex gap-4 items-start">
-                <div className="bg-primary text-white rounded-full w-8 h-8 flex items-center justify-center shrink-0">1</div>
-                <div>
-                  <h3 className="text-xl font-semibold">Create an Account</h3>
-                  <p className="text-gray-600">Register as a student, faculty member, or administrator.</p>
-                </div>
-              </div>
-              <div className="flex gap-4 items-start">
-                <div className="bg-primary text-white rounded-full w-8 h-8 flex items-center justify-center shrink-0">2</div>
-                <div>
-                  <h3 className="text-xl font-semibold">Explore the Dashboard</h3>
-                  <p className="text-gray-600">Access your personalized dashboard to view courses and activities.</p>
-                </div>
-              </div>
-              <div className="flex gap-4 items-start">
-                <div className="bg-primary text-white rounded-full w-8 h-8 flex items-center justify-center shrink-0">3</div>
-                <div>
-                  <h3 className="text-xl font-semibold">Join or Create Courses</h3>
-                  <p className="text-gray-600">Enroll in available courses or create new ones as an instructor.</p>
-                </div>
-              </div>
-            </div>
-            <div className="mt-8 text-center">
+          
+          {!user && (
+            <div className="mt-8 flex flex-wrap justify-center gap-4">
               <Button size="lg" asChild>
-                <Link to="/register">Create Your Account</Link>
+                <Link to="/login">Log In</Link>
+              </Button>
+              <Button size="lg" variant="outline" asChild>
+                <Link to="/register">Register</Link>
               </Button>
             </div>
-          </div>
-        </section>
-
-        <section className="py-12">
-          <h2 className="text-3xl font-bold text-center mb-6">Demo Accounts</h2>
-          <div className="max-w-3xl mx-auto bg-gray-100 p-6 rounded-lg">
-            <p className="text-center mb-4">
-              For demonstration purposes, you can use these test accounts:
-            </p>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <Card>
+          )}
+        </div>
+        
+        {user ? (
+          <>
+            <h2 className="text-2xl font-bold mb-6">Quick Access</h2>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <Card className="hover:shadow-lg transition-shadow">
                 <CardHeader>
-                  <CardTitle>Student</CardTitle>
+                  <div className="flex items-center gap-2">
+                    <BookOpen className="h-6 w-6 text-primary" />
+                    <CardTitle>Your Courses</CardTitle>
+                  </div>
+                  <CardDescription>Access all your courses</CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <p><strong>Email:</strong> student@example.com</p>
-                  <p><strong>Password:</strong> password123</p>
+                  <p>View course materials, assignments, and track your progress.</p>
                 </CardContent>
                 <CardFooter>
-                  <Button className="w-full" variant="outline" asChild>
-                    <Link to="/login">Login as Student</Link>
+                  <Button className="w-full" asChild>
+                    <Link to="/courses">Go to Courses</Link>
                   </Button>
                 </CardFooter>
               </Card>
-              <Card>
+              
+              <Card className="hover:shadow-lg transition-shadow">
                 <CardHeader>
-                  <CardTitle>Faculty</CardTitle>
+                  <div className="flex items-center gap-2">
+                    <FileText className="h-6 w-6 text-primary" />
+                    <CardTitle>Assignments</CardTitle>
+                  </div>
+                  <CardDescription>Manage your assignments</CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <p><strong>Email:</strong> faculty@example.com</p>
-                  <p><strong>Password:</strong> password123</p>
+                  <p>{user.role === 'student' ? 'Submit and track your assignments' : 'Create and grade student assignments'}</p>
                 </CardContent>
                 <CardFooter>
-                  <Button className="w-full" variant="outline" asChild>
-                    <Link to="/login">Login as Faculty</Link>
+                  <Button className="w-full" asChild>
+                    <Link to="/dashboard">View Assignments</Link>
                   </Button>
                 </CardFooter>
               </Card>
-              <Card>
+              
+              <Card className="hover:shadow-lg transition-shadow">
                 <CardHeader>
-                  <CardTitle>Admin</CardTitle>
+                  <div className="flex items-center gap-2">
+                    <Calendar className="h-6 w-6 text-primary" />
+                    <CardTitle>Schedule</CardTitle>
+                  </div>
+                  <CardDescription>Manage your academic schedule</CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <p><strong>Email:</strong> admin@example.com</p>
-                  <p><strong>Password:</strong> password123</p>
+                  <p>Keep track of classes, deadlines, and important events.</p>
                 </CardContent>
                 <CardFooter>
-                  <Button className="w-full" variant="outline" asChild>
-                    <Link to="/login">Login as Admin</Link>
+                  <Button className="w-full" asChild>
+                    <Link to="/dashboard">View Schedule</Link>
                   </Button>
                 </CardFooter>
               </Card>
             </div>
+            
+            {(user.role === 'faculty' || user.role === 'admin') && (
+              <div className="mt-10">
+                <h2 className="text-2xl font-bold mb-6">Faculty Tools</h2>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                  <Card className="hover:shadow-lg transition-shadow">
+                    <CardHeader>
+                      <div className="flex items-center gap-2">
+                        <Users className="h-6 w-6 text-primary" />
+                        <CardTitle>Manage Students</CardTitle>
+                      </div>
+                      <CardDescription>Enrollment and progress tracking</CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                      <p>View and manage student enrollment and track academic progress.</p>
+                    </CardContent>
+                    <CardFooter>
+                      <Button className="w-full" asChild>
+                        <Link to="/courses">Manage Students</Link>
+                      </Button>
+                    </CardFooter>
+                  </Card>
+                  
+                  <Card className="hover:shadow-lg transition-shadow">
+                    <CardHeader>
+                      <div className="flex items-center gap-2">
+                        <Award className="h-6 w-6 text-primary" />
+                        <CardTitle>Grading</CardTitle>
+                      </div>
+                      <CardDescription>Review and grade assignments</CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                      <p>Grade assignments, provide feedback, and manage academic scores.</p>
+                    </CardContent>
+                    <CardFooter>
+                      <Button className="w-full" asChild>
+                        <Link to="/dashboard">Go to Grading</Link>
+                      </Button>
+                    </CardFooter>
+                  </Card>
+                </div>
+              </div>
+            )}
+          </>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mt-10">
+            <Card>
+              <CardHeader>
+                <div className="flex items-center gap-2">
+                  <BookOpen className="h-6 w-6 text-primary" />
+                  <CardTitle>Rich Course Content</CardTitle>
+                </div>
+              </CardHeader>
+              <CardContent>
+                <p>Access a variety of course materials including PDFs, videos, and interactive content to enhance your learning experience.</p>
+              </CardContent>
+            </Card>
+            
+            <Card>
+              <CardHeader>
+                <div className="flex items-center gap-2">
+                  <FileText className="h-6 w-6 text-primary" />
+                  <CardTitle>Assignment Management</CardTitle>
+                </div>
+              </CardHeader>
+              <CardContent>
+                <p>Submit assignments, receive grades and feedback, and keep track of deadlines all in one place.</p>
+              </CardContent>
+            </Card>
+            
+            <Card>
+              <CardHeader>
+                <div className="flex items-center gap-2">
+                  <Users className="h-6 w-6 text-primary" />
+                  <CardTitle>Interactive Learning</CardTitle>
+                </div>
+              </CardHeader>
+              <CardContent>
+                <p>Engage with instructors and peers through discussions, collaborative projects, and real-time feedback.</p>
+              </CardContent>
+            </Card>
           </div>
-        </section>
+        )}
       </div>
     </Layout>
-  );
-};
-
-interface FeatureCardProps {
-  icon: React.ReactNode;
-  title: string;
-  description: string;
-}
-
-const FeatureCard: React.FC<FeatureCardProps> = ({ icon, title, description }) => {
-  return (
-    <Card className="text-center">
-      <CardHeader>
-        <div className="mx-auto mb-4 bg-primary/10 p-4 rounded-full">{icon}</div>
-        <CardTitle>{title}</CardTitle>
-      </CardHeader>
-      <CardContent>
-        <CardDescription className="text-base">{description}</CardDescription>
-      </CardContent>
-    </Card>
   );
 };
 
